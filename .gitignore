@@ -1,0 +1,8 @@
+# custom
+src/.temp
+
+# IDE
+.idea
+
+# Python
+**/__pycache__
