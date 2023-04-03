@@ -12,7 +12,7 @@ def eur_exch_sell_rate():
     # check request headers authorization
     auth = request.headers.get('Authorization', '')
     key = os.getenv('FLASK_API_AUTH_TOKEN')
-    if auth == '' or auth != 'Bearer ' + key:
+    if auth == '' or auth != key:
         return redirect(url_for('not_found'))
 
     # get query parameters
