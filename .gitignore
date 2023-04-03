@@ -1,5 +1,6 @@
 # custom
 src/.temp
+.env
 
 # IDE
 .idea

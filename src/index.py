@@ -85,12 +85,12 @@ def get_exchange_rate(
 
     # validate currency
     currency = currency.upper()
-    if currency not in CURRENCY:
+    if currency in CURRENCY:
+        # filter out the rows with '代号' == currency
+        df = df[df['代号'] == currency]
+    elif currency not in CURRENCY and currency != 'ALL':
         logger.error(f"Invalid currency: {currency}.")
         return
-
-    # filter out the rows with '代号' == currency
-    df = df[df['代号'] == currency]
 
     if debug:
         logger.debug(f"Successfully got the exchange rate of {currency}:\n{df}")
@@ -100,6 +100,9 @@ def get_exchange_rate(
 
 
 def get_exchange_rate_bank_sell(*args, **kwargs):
+    if 'currency' not in kwargs:
+        print("Please specify the currency.")
+        return
     df = get_exchange_rate(*args, **kwargs)
     print(f"{kwargs['currency']} 现汇卖出价: {df['现汇卖出价'].iloc[0]}")
     return
@@ -108,23 +111,54 @@ def get_exchange_rate_bank_sell(*args, **kwargs):
 def get_exchange_rate_api(*args, **kwargs):
     df = get_exchange_rate(*args, **kwargs)
 
-    # get values
-    currency = kwargs['currency']
-    exch_buy = df['现汇买入价'].iloc[0]
-    exch_sell = df['现汇卖出价'].iloc[0]
-    cash_buy = df['现钞买入价'].iloc[0]
-    cash_sell = df['现钞卖出价'].iloc[0]
+    if df is None:
+        return {
+            'status': 'error',
+            'message': 'Failed to get the exchange rate.'
+        }
+    currency = kwargs['currency'].upper()
 
-    # make dict
-    exch_rate = {
-        'currency': currency,
-        'exch_buy': exch_buy,
-        'exch_sell': exch_sell,
-        'cash_buy': cash_buy,
-        'cash_sell': cash_sell
-    }
+    # validate currency
+    if currency == 'ALL':
+        exch_rate = [
+            {
+                'currency': cur,
+                'name': name,
+                'exch_buy': exch_buy,
+                'exch_sell': exch_sell,
+                'cash_buy': cash_buy,
+                'cash_sell': cash_sell
+            }
+            for cur, name, exch_buy, cash_buy, exch_sell, cash_sell in
+            zip(*df.drop('发布时间', axis=1).to_dict(orient='list').values())
+        ]
+        response = {
+            'status': 'success',
+            'data': exch_rate
+        }
+    else:
+        # get values
+        name = df[df['代号'] == currency]['币种'].iloc[0]
+        exch_buy = df['现汇买入价'].iloc[0]
+        exch_sell = df['现汇卖出价'].iloc[0]
+        cash_buy = df['现钞买入价'].iloc[0]
+        cash_sell = df['现钞卖出价'].iloc[0]
 
-    return exch_rate
+        # make dict
+        exch_rate = [{
+            'currency': currency,
+            'name': name,
+            'exch_buy': exch_buy,
+            'exch_sell': exch_sell,
+            'cash_buy': cash_buy,
+            'cash_sell': cash_sell
+        }]
+        response = {
+            'status': 'success',
+            'data': exch_rate
+        }
+
+    return response
 
 
 if __name__ == '__main__':
