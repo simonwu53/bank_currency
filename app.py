@@ -6,13 +6,19 @@ from src import get_exchange_rate_api
 
 load_dotenv()
 app = Flask(__name__)
+API_PREFIX = os.getenv('FLASK_API_URL_PREFIX', '/api')
 
-@app.route('/api/v1/exchangerate')
+
+@app.route(os.path.join(API_PREFIX, 'exchangerate'))
 def eur_exch_sell_rate():
     # check request headers authorization
     auth = request.headers.get('Authorization', '')
     key = os.getenv('FLASK_API_AUTH_TOKEN')
+    if not key:
+        Flask.logger.error('FLASK_API_AUTH_TOKEN is not set.')
+        return redirect(url_for('not_found'))
     if auth == '' or auth != key:
+        Flask.logger.error('Invalid Authorization.')
         return redirect(url_for('not_found'))
 
     # get query parameters

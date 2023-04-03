@@ -6,8 +6,12 @@ Get the currency exchange rate from ICBC via Flask API
 0. create `.env` file at root dir as follows
 
 ```bash
-# .env
+# edit .env file
+# Flask API Token (required)
 FLASK_API_AUTH_TOKEN=your_token
+
+# default API url prefix
+FLASK_API_URL_PREFIX=/api
 ```
 
 1. create virtual environment
@@ -57,8 +61,16 @@ crontab -e
 ```
 
 
-## 3. API
+## 3. Call API
+The default host will run at localhost: `http://127.0.0.1:5000`
 
+```bash
+# api call for a specific currency
+http://127.0.0.1:5000/api/exchangerate?currency=EUR&now=true
+
+# api call for all currencies
+http://127.0.0.1:5000/api/exchangerate
+```
 
 
 ## TODO:
