@@ -65,19 +65,20 @@ def get_exchange_rate(
         print(f"Getting the exchange rate of {currency} from url: {url}")
 
     # run pipeline to get the currency exchange rate
-    if now:
-        if verbose:
-            print('Getting the exchange rate at present.')
-        df = pipeline(url=url, debug=debug)
-    else:
-        if verbose:
-            print('Getting the exchange rate from storage.')
+    if not now:
         # get currency exchange rate from storage
         filename = get_latest_file(storage)
         if filename is None:
-            logger.error(f'Failed to get the latest file in {storage}.')
-            return
-        df = parse_csv(filename, debug=debug)
+            logger.error(f'Failed to get the latest file in {storage}. Use pipeline to get the exchange rate.')
+            df = pipeline(url=url, debug=debug)
+        else:
+            if verbose:
+                print('Getting the exchange rate from storage.')
+            df = parse_csv(filename, debug=debug)
+    else:
+        if verbose:
+            print('Getting the exchange rate at present.')
+        df = pipeline(url=url, debug=debug)
 
     if df is None:
         logger.error('Failed to get the exchange rate DataFrame.')
