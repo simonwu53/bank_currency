@@ -16,7 +16,7 @@ parser.add_argument('--pipeline', '-p', action='store_true',
 parser.add_argument('--storage', '-s', type=str, help='Specify the storage path.')
 # common arguments
 parser.add_argument('--verbose', '-v', action='store_true', help='Verbose mode.')
-parser.add_argument('--debug', action='store_true', version='print out debug info.')
+parser.add_argument('--debug', action='store_true', help='print out debug info.')
 
 
 if __name__ == '__main__':
