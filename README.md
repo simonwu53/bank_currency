@@ -33,7 +33,8 @@ conda activate icbc
 pip install -r requirements.txt
 
 # conda
-conda install --file requirements.txt
+conda install requests pandas flask beautifulsoup4 python-dotenv
+conda install -c conda-forge waitress
 ```
 
 ## 2. Run

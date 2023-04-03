@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from waitress import serve
 from flask import Flask, request, abort, url_for, redirect
 from src import get_exchange_rate_api
 
@@ -51,4 +52,5 @@ def page_not_found(error):
 
 if __name__ == '__main__':
     # Running on http://127.0.0.1:5000
-    app.run(debug=True)
+    # app.run(debug=True)
+    serve(app, host='127.0.0.1', port=5000)
