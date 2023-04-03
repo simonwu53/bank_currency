@@ -117,47 +117,24 @@ def get_exchange_rate_api(*args, **kwargs):
             'status': 'error',
             'message': 'Failed to get the exchange rate.'
         }
-    currency = kwargs['currency'].upper()
 
-    # validate currency
-    if currency == 'ALL':
-        exch_rate = [
-            {
-                'currency': cur,
-                'name': name,
-                'exch_buy': exch_buy,
-                'exch_sell': exch_sell,
-                'cash_buy': cash_buy,
-                'cash_sell': cash_sell
-            }
-            for cur, name, exch_buy, cash_buy, exch_sell, cash_sell in
-            zip(*df.drop('发布时间', axis=1).to_dict(orient='list').values())
-        ]
-        response = {
-            'status': 'success',
-            'data': exch_rate
-        }
-    else:
-        # get values
-        name = df[df['代号'] == currency]['币种'].iloc[0]
-        exch_buy = df['现汇买入价'].iloc[0]
-        exch_sell = df['现汇卖出价'].iloc[0]
-        cash_buy = df['现钞买入价'].iloc[0]
-        cash_sell = df['现钞卖出价'].iloc[0]
-
-        # make dict
-        exch_rate = [{
-            'currency': currency,
+    # create response
+    exch_rate = [
+        {
+            'currency': cur,
             'name': name,
             'exch_buy': exch_buy,
             'exch_sell': exch_sell,
             'cash_buy': cash_buy,
             'cash_sell': cash_sell
-        }]
-        response = {
-            'status': 'success',
-            'data': exch_rate
         }
+        for cur, name, exch_buy, cash_buy, exch_sell, cash_sell in
+        zip(*df.drop('发布时间', axis=1).to_dict(orient='list').values())
+    ]
+    response = {
+        'status': 'success',
+        'data': exch_rate
+    }
 
     return response
 
