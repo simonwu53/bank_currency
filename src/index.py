@@ -92,7 +92,8 @@ def get_exchange_rate(
     # filter out the rows with '代号' == currency
     df = df[df['代号'] == currency]
 
-    logger.info(f"Successfully got the exchange rate of {currency}:\n{df}")
+    if debug:
+        logger.debug(f"Successfully got the exchange rate of {currency}:\n{df}")
     if verbose:
         print(f"Successfully got the exchange rate of {currency}:\n{df}")
     return df
@@ -104,5 +105,38 @@ def get_exchange_rate_bank_sell(*args, **kwargs):
     return
 
 
+def get_exchange_rate_api(*args, **kwargs):
+    df = get_exchange_rate(*args, **kwargs)
+
+    # get values
+    currency = kwargs['currency']
+    exch_buy = df['现汇买入价'].iloc[0]
+    exch_sell = df['现汇卖出价'].iloc[0]
+    cash_buy = df['现钞买入价'].iloc[0]
+    cash_sell = df['现钞卖出价'].iloc[0]
+
+    # make dict
+    exch_rate = {
+        'currency': currency,
+        'exch_buy': exch_buy,
+        'exch_sell': exch_sell,
+        'cash_buy': cash_buy,
+        'cash_sell': cash_sell
+    }
+
+    return exch_rate
+
+
 if __name__ == '__main__':
-    print(get_exchange_rate("https://www.icbc.com.cn/ICBCDynamicSite/Optimize/Quotation/QuotationListIframe.aspx"))
+    print(get_exchange_rate(
+        url="https://www.icbc.com.cn/ICBCDynamicSite/Optimize/Quotation/QuotationListIframe.aspx",
+        storage='../assets/',
+        now=False
+    ))
+    print(get_exchange_rate_api(
+        url="https://www.icbc.com.cn/ICBCDynamicSite/Optimize/Quotation/QuotationListIframe.aspx",
+        currency='EUR',
+        storage='../assets/',
+        now=False
+    ))
+
