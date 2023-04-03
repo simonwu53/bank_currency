@@ -41,8 +41,11 @@ conda install -c conda-forge waitress
 ### 2.1 Run API server
 
 ```bash
-# run the flask app
+# run the flask server
 flask run --port 5000
+
+# run WSGI server
+python app.py
 ```
 
 ### 2.2 Run periodic task (require conda env)
@@ -70,7 +73,7 @@ The default host will run at localhost: `http://127.0.0.1:5000`
 http://127.0.0.1:5000/api/exchangerate?currency=EUR&now=true
 
 # api call for all currencies
-http://127.0.0.1:5000/api/exchangerate
+http://127.0.0.1:5000/api/exchangerate?currency=all
 ```
 
 

@@ -16,19 +16,23 @@ def eur_exch_sell_rate():
     auth = request.headers.get('Authorization', '')
     key = os.getenv('FLASK_API_AUTH_TOKEN')
     if not key:
-        Flask.logger.error('FLASK_API_AUTH_TOKEN is not set.')
+        app.logger.error('FLASK_API_AUTH_TOKEN is not set.')
         return redirect(url_for('not_found'))
     if auth == '' or auth != key:
-        Flask.logger.error('Invalid Authorization.')
+        app.logger.error('Invalid Authorization.')
         return redirect(url_for('not_found'))
 
     # get query parameters
+    currency = request.args.get('currency', 'none')
+    if currency == 'none':
+        app.logger.error('No currency specified.')
+        return redirect(url_for('not_found'))
+
     now = request.args.get('now', 'false')
     if now.lower() == 'true':
         now = True
     else:
         now = False
-    currency = request.args.get('currency', 'ALL')
 
     # call api
     exch_rate = get_exchange_rate_api(
