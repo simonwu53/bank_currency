@@ -17,16 +17,21 @@ logger = get_logger('Index', filename='index.log')
 def pipeline(
         url: str,
         storage: Optional[str] = None,
-        verbose: bool = False
+        verbose: bool = False,
+        debug: bool = False
 ) -> Optional[pd.DataFrame]:
     # fetch html content
+    if verbose:
+        print(f"Fetching html content from: {url}")
     html_content = fetch_html_content(url=url)
     if html_content is None:
         logger.error('No html content to parse.')
         return
 
     # parse html content
-    df = parse_html(html_content)
+    if verbose:
+        print('Parsing html content.')
+    df = parse_html(html_content, debug=debug)
     if df is None:
         logger.error('Failed to parse the html content.')
         return
@@ -43,6 +48,8 @@ def pipeline(
             # save to storage
             df.to_csv(filename, header=True, index=False)
             logger.info(f"Successfully saved to storage: {storage}")
+            if verbose:
+                print(f"Successfully saved to storage: {storage}")
     return df
 
 
@@ -51,25 +58,26 @@ def get_exchange_rate(
         currency: str = 'EUR',
         now: bool = True,
         storage: str = 'assets/',
-        verbose: bool = False
+        verbose: bool = False,
+        debug: bool = False
 ) -> Optional[pd.DataFrame]:
     if verbose:
-        logger.info(f"Getting the exchange rate of {currency} from url: {url}")
+        print(f"Getting the exchange rate of {currency} from url: {url}")
 
     # run pipeline to get the currency exchange rate
     if now:
         if verbose:
-            logger.info('Getting the exchange rate at present.')
-        df = pipeline(url=url)
+            print('Getting the exchange rate at present.')
+        df = pipeline(url=url, debug=debug)
     else:
         if verbose:
-            logger.info('Getting the exchange rate from storage.')
+            print('Getting the exchange rate from storage.')
         # get currency exchange rate from storage
         filename = get_latest_file(storage)
         if filename is None:
             logger.error(f'Failed to get the latest file in {storage}.')
             return
-        df = parse_csv(filename)
+        df = parse_csv(filename, debug=debug)
 
     if df is None:
         logger.error('Failed to get the exchange rate DataFrame.')
@@ -85,6 +93,8 @@ def get_exchange_rate(
     df = df[df['代号'] == currency]
 
     logger.info(f"Successfully got the exchange rate of {currency}:\n{df}")
+    if verbose:
+        print(f"Successfully got the exchange rate of {currency}:\n{df}")
     return df
 
 

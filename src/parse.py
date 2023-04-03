@@ -10,7 +10,7 @@ except ImportError:
 logger = get_logger('parser', filename='parser.log')
 
 
-def parse_html(html: str) -> Optional[pd.DataFrame]:
+def parse_html(html: str, debug: bool = False) -> Optional[pd.DataFrame]:
     # parse html
     soup = bs(html, 'lxml')
 
@@ -49,11 +49,14 @@ def parse_html(html: str) -> Optional[pd.DataFrame]:
     # reorder columns, move '代号' to the first column
     df = df[list(df.columns[-1:]) + list(df.columns[:-1])]
 
-    logger.info(f"Successfully parsed the html content: \n{df}")
+    if debug:
+        logger.info(f"Successfully parsed the html content: \n{df}")
+    else:
+        logger.info(f"Successfully parsed the html content.")
     return df
 
 
-def parse_csv(csv: Optional[str]) -> Optional[pd.DataFrame]:
+def parse_csv(csv: Optional[str], debug: bool = False) -> Optional[pd.DataFrame]:
     # parse csv
     df = pd.read_csv(csv, header=0, index_col=None)
     # parse column '发布时间', e.g. '2023年04月01日 04:14:05' -> '2023-04-01 04:14:05', and convert to datetime
@@ -62,7 +65,10 @@ def parse_csv(csv: Optional[str]) -> Optional[pd.DataFrame]:
             .str.replace(r'年|月', '-', regex=True)
             .str.replace(r'日', '', regex=True)
     )
-    logger.info(f"Successfully parsed the csv content: \n{df}")
+    if debug:
+        logger.info(f"Successfully parsed the csv content: \n{df}")
+    else:
+        logger.info(f"Successfully parsed the csv content.")
     return df
 
 

@@ -16,6 +16,7 @@ parser.add_argument('--pipeline', '-p', action='store_true',
 parser.add_argument('--storage', '-s', type=str, help='Specify the storage path.')
 # common arguments
 parser.add_argument('--verbose', '-v', action='store_true', help='Verbose mode.')
+parser.add_argument('--debug', action='store_true', version='print out debug info.')
 
 
 if __name__ == '__main__':
@@ -25,11 +26,16 @@ if __name__ == '__main__':
             url=URL,
             currency=args.currency,
             now=args.now,
-            verbose=args.verbose
+            verbose=args.verbose,
+            debug=args.debug
         )
+        exit(0)
     if args.pipeline:
         df = pipeline(
             url=URL,
             storage=args.storage,
-            verbose=args.verbose
+            verbose=args.verbose,
+            debug=args.debug
         )
+        exit(0)
+    print('No action specified. One must set either --currency or --pipeline flag. Use -h to see help.')
