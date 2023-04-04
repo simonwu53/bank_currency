@@ -26,7 +26,7 @@ def pipeline(
         print(f"Fetching html content from: {url}")
     html_content = fetch_html_content(url=url)
     if html_content is None:
-        logger.error('No html content to parse.')
+        _log('No html content to parse.', verbose=verbose, level='error')
         return
 
     # parse html content
@@ -34,33 +34,39 @@ def pipeline(
         print('Parsing html content.')
     df = parse_html(html_content, debug=debug)
     if df is None:
-        logger.error('Failed to parse the html content.')
+        _log('Failed to parse the html content.', verbose=verbose, level='error')
         return
 
     # save to storage
+    if verbose:
+        print('Saving to storage.')
     if storage is not None:
         # check storage path exists
         if not os.path.exists(storage):
-            logger.error(f"Storage path does not exist: {storage}")
+            _log(f"Storage path does not exist: {storage}", verbose=verbose, level='error')
             return df
         else:
             # make filename as datetime from df
             filename = os.path.join(storage, df['发布时间'].iloc[0].strftime('%Y_%m_%d-%H_%M_%S') + '.csv')
             # save to storage
             df.to_csv(filename, header=True, index=False)
-            logger.info(f"Successfully saved to storage: {storage}")
-            if verbose:
-                print(f"Successfully saved to storage: {storage}")
+            _log(f"Successfully saved to storage: {storage}", verbose=verbose)
 
     # clean storage if files are 60 days away from the latest file
+    if verbose:
+        print('Cleaning storage.')
     if clean:
         outdated_files = get_outdated_files(storage, ext='csv', days=60)
         if len(outdated_files) > 0:
             for file in outdated_files:
-                os.remove(file)
-                logger.info(f"Successfully removed file: {file}")
-                if verbose:
-                    print(f"Successfully removed file: {file}")
+                try:
+                    os.remove(file)
+                    _log(f"Successfully removed file: {file}", verbose=verbose)
+                except OSError:
+                    _log(f"Failed to remove file: {file}", verbose=verbose, level='error')
+
+    if verbose:
+        print('Pipeline finished.')
     return df
 
 
@@ -148,6 +154,22 @@ def get_exchange_rate_api(*args, **kwargs):
     }
 
     return response
+
+
+def _log(msg: str, verbose: bool = False, level: str = 'info'):
+    if verbose:
+        print(msg)
+    if level.lower() == 'info':
+        logger.info(msg)
+    elif level.lower() == 'error':
+        logger.error(msg)
+    elif level.lower() == 'debug':
+        logger.debug(msg)
+    elif level.lower() == 'warning':
+        logger.warning(msg)
+    elif level.lower() == 'critical':
+        logger.critical(msg)
+    return
 
 
 if __name__ == '__main__':
