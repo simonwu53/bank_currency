@@ -15,6 +15,7 @@ parser.add_argument('--now', '-n', action='store_true',
 parser.add_argument('--pipeline', '-p', action='store_true',
                     help='Run pipeline to fetch the exchange rate from website and save to storage.')
 parser.add_argument('--storage', '-s', type=str, help='Specify the storage path.')
+parser.add_argument('--clean', action='store_true', help='Clean the storage files than is older than 60 day.')
 # common arguments
 parser.add_argument('--verbose', '-v', action='store_true', help='Verbose mode.')
 parser.add_argument('--debug', action='store_true', help='print out debug info.')

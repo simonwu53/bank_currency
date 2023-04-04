@@ -4,11 +4,11 @@ from typing import Optional
 try:
     from .fetch import fetch_html_content
     from .parse import parse_html, parse_csv
-    from .utils import get_latest_file, get_logger, CURRENCY
+    from .utils import get_outdated_files, get_latest_file, get_logger, CURRENCY
 except ImportError:
     from fetch import fetch_html_content
     from parse import parse_html, parse_csv
-    from utils import get_latest_file, get_logger, CURRENCY
+    from utils import get_outdated_files, get_latest_file, get_logger, CURRENCY
 
 
 logger = get_logger('Index', filename='index.log')
@@ -18,7 +18,8 @@ def pipeline(
         url: str,
         storage: Optional[str] = None,
         verbose: bool = False,
-        debug: bool = False
+        debug: bool = False,
+        clean: bool = False
 ) -> Optional[pd.DataFrame]:
     # fetch html content
     if verbose:
@@ -50,6 +51,16 @@ def pipeline(
             logger.info(f"Successfully saved to storage: {storage}")
             if verbose:
                 print(f"Successfully saved to storage: {storage}")
+
+    # clean storage if files are 60 days away from the latest file
+    if clean:
+        outdated_files = get_outdated_files(storage, ext='csv', days=60)
+        if len(outdated_files) > 0:
+            for file in outdated_files:
+                os.remove(file)
+                logger.info(f"Successfully removed file: {file}")
+                if verbose:
+                    print(f"Successfully removed file: {file}")
     return df
 
 
