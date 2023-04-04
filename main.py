@@ -1,6 +1,6 @@
 import argparse
 import os
-from src import pipeline, get_exchange_rate, get_exchange_rate_bank_sell
+from src import pipeline, get_exchange_rate_bank_sell
 
 
 URL = 'https://www.icbc.com.cn/ICBCDynamicSite/Optimize/Quotation/QuotationListIframe.aspx'
