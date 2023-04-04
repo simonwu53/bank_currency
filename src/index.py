@@ -173,10 +173,11 @@ def get_exchange_rate_api(*args, **kwargs):
             'exch_buy': exch_buy,
             'exch_sell': exch_sell,
             'cash_buy': cash_buy,
-            'cash_sell': cash_sell
+            'cash_sell': cash_sell,
+            'datetime': dt.strftime('%Y-%m-%d %H:%M:%S'),
         }
-        for cur, name, exch_buy, cash_buy, exch_sell, cash_sell in
-        zip(*df.drop('发布时间', axis=1).to_dict(orient='list').values())
+        for cur, name, exch_buy, cash_buy, exch_sell, cash_sell, dt in
+        zip(*df.to_dict(orient='list').values())
     ]
     response = {
         'status': 'success',
