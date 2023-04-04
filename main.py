@@ -1,4 +1,5 @@
 import argparse
+import os
 from src import pipeline, get_exchange_rate, get_exchange_rate_bank_sell
 
 
@@ -20,6 +21,14 @@ parser.add_argument('--debug', action='store_true', help='print out debug info.'
 
 
 if __name__ == '__main__':
+    # check current working directory equals to the file directory
+    cwd = os.getcwd()
+    if cwd != os.path.dirname(os.path.abspath(__file__)):
+        print('Please run this script from the root directory of the project. '
+              f'Current working directory: {cwd}, '
+              f'Project root directory: {os.path.dirname(os.path.abspath(__file__))}')
+        exit(1)
+
     args = parser.parse_args()
     if args.currency:
         df = get_exchange_rate_bank_sell(
