@@ -35,6 +35,9 @@ pip install -r requirements.txt
 # conda
 conda install requests pandas flask beautifulsoup4 python-dotenv
 conda install -c conda-forge waitress
+
+# push notification
+pip install pypushdeer
 ```
 
 ## 2. Run
