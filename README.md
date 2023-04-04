@@ -64,7 +64,7 @@ crontab -e
 
 # add the following line
 # At minute 5 past every hour.
-5 */1 * * * bash /path/to/exe/job.sh
+5 */1 * * * /bin/bash /path/to/exe/job.sh
 ```
 
 
