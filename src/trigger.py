@@ -26,6 +26,7 @@ Requirements for the trigger functions:
 2. The function must accept a pandas.DataFrame object as the first and required positional argument.
 3. The function must return a boolean value indicating whether the trigger is successfully executed.
 4. Use `try` and `except` to catch any exceptions.
+5. Use pushdeer to send notifications.
 """
 
 
@@ -60,6 +61,7 @@ def trigger_when_price_is_lower_than(
     except Exception as e:
         logger.error(f"Failed to run <trigger_when_price_is_lower_than>: {e}")
         return False
+    logger.info(f"Successfully run Trigger: <trigger_when_price_is_lower_than>.")
     return True
 
 
