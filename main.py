@@ -31,8 +31,9 @@ if __name__ == '__main__':
         exit(1)
 
     args = parser.parse_args()
+    print(args)
     if args.currency:
-        df = get_exchange_rate_bank_sell(
+        get_exchange_rate_bank_sell(
             url=URL,
             currency=args.currency,
             now=args.now,
@@ -41,11 +42,12 @@ if __name__ == '__main__':
         )
         exit(0)
     if args.pipeline:
-        df = pipeline(
+        print(pipeline(
             url=URL,
             storage=args.storage,
             verbose=args.verbose,
-            debug=args.debug
-        )
+            debug=args.debug,
+            clean=args.clean
+        ))
         exit(0)
     print('No action specified. One must set either --currency or --pipeline flag. Use -h to see help.')

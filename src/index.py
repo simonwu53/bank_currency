@@ -1,13 +1,14 @@
 import os
 import pandas as pd
 from typing import Optional
-import trigger
 try:
+    from . import trigger
     from .fetch import fetch_html_content
     from .parse import parse_html, parse_csv
     from .utils import get_outdated_files, get_latest_file, get_logger, CURRENCY, \
         get_modules
 except ImportError:
+    import trigger
     from fetch import fetch_html_content
     from parse import parse_html, parse_csv
     from utils import get_outdated_files, get_latest_file, get_logger, CURRENCY, \
@@ -91,6 +92,8 @@ def pipeline(
                     _log(f"Successfully removed file: {file}", verbose=verbose)
                 except OSError:
                     _log(f"Failed to remove file: {file}", verbose=verbose, level='error')
+        else:
+            _log(f"No outdated files to remove.", verbose=verbose)
 
     if verbose:
         print('Pipeline finished.')
