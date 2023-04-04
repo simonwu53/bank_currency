@@ -1,17 +1,21 @@
 import os
 import pandas as pd
 from typing import Optional
+import trigger
 try:
     from .fetch import fetch_html_content
     from .parse import parse_html, parse_csv
-    from .utils import get_outdated_files, get_latest_file, get_logger, CURRENCY
+    from .utils import get_outdated_files, get_latest_file, get_logger, CURRENCY, \
+        get_modules
 except ImportError:
     from fetch import fetch_html_content
     from parse import parse_html, parse_csv
-    from utils import get_outdated_files, get_latest_file, get_logger, CURRENCY
+    from utils import get_outdated_files, get_latest_file, get_logger, CURRENCY, \
+        get_modules
 
 
 logger = get_logger('Index', filename='index.log')
+triggers = get_modules(trigger, prefix='trigger_')
 
 
 def pipeline(
@@ -19,7 +23,8 @@ def pipeline(
         storage: Optional[str] = None,
         verbose: bool = False,
         debug: bool = False,
-        clean: bool = False
+        clean: bool = False,
+        use_triggers: bool = False
 ) -> Optional[pd.DataFrame]:
     # fetch html content
     if verbose:
@@ -36,6 +41,28 @@ def pipeline(
     if df is None:
         _log('Failed to parse the html content.', verbose=verbose, level='error')
         return
+
+    # use triggers
+    if verbose:
+        print('Activating triggers.')
+    if use_triggers:
+        for fn in triggers:
+            try:
+                st = fn(df)
+            except Exception as e:
+                _log(f"Uncaught error occurred in Trigger <{fn.__name__}>. "
+                     f"It will be removed from future scheduled jobs. "
+                     f"Restart the backend to re-enable it.",
+                     verbose=verbose,
+                     level='critical')
+                triggers.remove(fn)
+                continue
+
+            # report results
+            if st:
+                _log(f"Trigger <{fn.__name__}> executed.", verbose=verbose)
+            else:
+                _log(f"Trigger <{fn.__name__}> failed.", verbose=verbose, level='error')
 
     # save to storage
     if verbose:

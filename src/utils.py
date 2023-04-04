@@ -1,7 +1,8 @@
 import os
+import types
 import logging
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Callable
 
 
 CURRENCY = (
@@ -103,6 +104,19 @@ def get_outdated_files(path: str, ext: str = 'csv', days: int = 60) -> List[str]
         else:
             logger.info(f"Found {len(outdated_files)} outdated files in {path}.")
         return outdated_files
+
+
+def get_modules(module: types.ModuleType, prefix: Optional[str] = None) -> List[Callable]:
+    modules = []
+    for name in dir(module):
+        if name.startswith('_') or name[0].isupper():
+            continue
+        if prefix is not None and not name.startswith(prefix):
+            continue
+        obj = getattr(module, name)
+        if callable(obj):
+            modules.append(obj)
+    return modules
 
 
 if __name__ == '__main__':
