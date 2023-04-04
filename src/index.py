@@ -2,16 +2,21 @@ import os
 import pandas as pd
 from typing import Optional
 try:
+    from . import trigger
     from .fetch import fetch_html_content
     from .parse import parse_html, parse_csv
-    from .utils import get_outdated_files, get_latest_file, get_logger, CURRENCY
+    from .utils import get_outdated_files, get_latest_file, get_logger, CURRENCY, \
+        get_modules
 except ImportError:
+    import trigger
     from fetch import fetch_html_content
     from parse import parse_html, parse_csv
-    from utils import get_outdated_files, get_latest_file, get_logger, CURRENCY
+    from utils import get_outdated_files, get_latest_file, get_logger, CURRENCY, \
+        get_modules
 
 
 logger = get_logger('Index', filename='index.log')
+triggers = get_modules(trigger, prefix='trigger_')
 
 
 def pipeline(
@@ -19,14 +24,15 @@ def pipeline(
         storage: Optional[str] = None,
         verbose: bool = False,
         debug: bool = False,
-        clean: bool = False
+        clean: bool = False,
+        use_triggers: bool = False
 ) -> Optional[pd.DataFrame]:
     # fetch html content
     if verbose:
         print(f"Fetching html content from: {url}")
     html_content = fetch_html_content(url=url)
     if html_content is None:
-        logger.error('No html content to parse.')
+        _log('No html content to parse.', verbose=verbose, level='error')
         return
 
     # parse html content
@@ -34,33 +40,63 @@ def pipeline(
         print('Parsing html content.')
     df = parse_html(html_content, debug=debug)
     if df is None:
-        logger.error('Failed to parse the html content.')
+        _log('Failed to parse the html content.', verbose=verbose, level='error')
         return
 
+    # use triggers
+    if verbose:
+        print('Activating triggers.')
+    if use_triggers:
+        for fn in triggers:
+            try:
+                st = fn(df)
+            except Exception as e:
+                _log(f"Uncaught error occurred in Trigger <{fn.__name__}>. "
+                     f"It will be removed from future scheduled jobs. "
+                     f"Restart the backend to re-enable it.",
+                     verbose=verbose,
+                     level='critical')
+                triggers.remove(fn)
+                continue
+
+            # report results
+            if st:
+                _log(f"Trigger <{fn.__name__}> executed.", verbose=verbose)
+            else:
+                _log(f"Trigger <{fn.__name__}> failed.", verbose=verbose, level='error')
+
     # save to storage
+    if verbose:
+        print('Saving to storage.')
     if storage is not None:
         # check storage path exists
         if not os.path.exists(storage):
-            logger.error(f"Storage path does not exist: {storage}")
+            _log(f"Storage path does not exist: {storage}", verbose=verbose, level='error')
             return df
         else:
             # make filename as datetime from df
             filename = os.path.join(storage, df['发布时间'].iloc[0].strftime('%Y_%m_%d-%H_%M_%S') + '.csv')
             # save to storage
             df.to_csv(filename, header=True, index=False)
-            logger.info(f"Successfully saved to storage: {storage}")
-            if verbose:
-                print(f"Successfully saved to storage: {storage}")
+            _log(f"Successfully saved to storage: {storage}", verbose=verbose)
 
     # clean storage if files are 60 days away from the latest file
+    if verbose:
+        print('Cleaning storage.')
     if clean:
         outdated_files = get_outdated_files(storage, ext='csv', days=60)
         if len(outdated_files) > 0:
             for file in outdated_files:
-                os.remove(file)
-                logger.info(f"Successfully removed file: {file}")
-                if verbose:
-                    print(f"Successfully removed file: {file}")
+                try:
+                    os.remove(file)
+                    _log(f"Successfully removed file: {file}", verbose=verbose)
+                except OSError:
+                    _log(f"Failed to remove file: {file}", verbose=verbose, level='error')
+        else:
+            _log(f"No outdated files to remove.", verbose=verbose)
+
+    if verbose:
+        print('Pipeline finished.')
     return df
 
 
@@ -148,6 +184,22 @@ def get_exchange_rate_api(*args, **kwargs):
     }
 
     return response
+
+
+def _log(msg: str, verbose: bool = False, level: str = 'info'):
+    if verbose:
+        print(msg)
+    if level.lower() == 'info':
+        logger.info(msg)
+    elif level.lower() == 'error':
+        logger.error(msg)
+    elif level.lower() == 'debug':
+        logger.debug(msg)
+    elif level.lower() == 'warning':
+        logger.warning(msg)
+    elif level.lower() == 'critical':
+        logger.critical(msg)
+    return
 
 
 if __name__ == '__main__':

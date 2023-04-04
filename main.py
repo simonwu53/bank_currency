@@ -1,6 +1,6 @@
 import argparse
 import os
-from src import pipeline, get_exchange_rate, get_exchange_rate_bank_sell
+from src import pipeline, get_exchange_rate_bank_sell
 
 
 URL = 'https://www.icbc.com.cn/ICBCDynamicSite/Optimize/Quotation/QuotationListIframe.aspx'
@@ -16,6 +16,7 @@ parser.add_argument('--pipeline', '-p', action='store_true',
                     help='Run pipeline to fetch the exchange rate from website and save to storage.')
 parser.add_argument('--storage', '-s', type=str, help='Specify the storage path.')
 parser.add_argument('--clean', action='store_true', help='Clean the storage files than is older than 60 day.')
+parser.add_argument('--use-triggers', action='store_true', help='Enable triggers.')
 # common arguments
 parser.add_argument('--verbose', '-v', action='store_true', help='Verbose mode.')
 parser.add_argument('--debug', action='store_true', help='print out debug info.')
@@ -31,8 +32,9 @@ if __name__ == '__main__':
         exit(1)
 
     args = parser.parse_args()
+    print(args)
     if args.currency:
-        df = get_exchange_rate_bank_sell(
+        get_exchange_rate_bank_sell(
             url=URL,
             currency=args.currency,
             now=args.now,
@@ -41,11 +43,13 @@ if __name__ == '__main__':
         )
         exit(0)
     if args.pipeline:
-        df = pipeline(
+        print(pipeline(
             url=URL,
             storage=args.storage,
             verbose=args.verbose,
-            debug=args.debug
-        )
+            debug=args.debug,
+            clean=args.clean,
+            use_triggers=args.use_triggers
+        ))
         exit(0)
     print('No action specified. One must set either --currency or --pipeline flag. Use -h to see help.')
