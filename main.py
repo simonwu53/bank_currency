@@ -16,6 +16,7 @@ parser.add_argument('--pipeline', '-p', action='store_true',
                     help='Run pipeline to fetch the exchange rate from website and save to storage.')
 parser.add_argument('--storage', '-s', type=str, help='Specify the storage path.')
 parser.add_argument('--clean', action='store_true', help='Clean the storage files than is older than 60 day.')
+parser.add_argument('--use-triggers', action='store_true', help='Enable triggers.')
 # common arguments
 parser.add_argument('--verbose', '-v', action='store_true', help='Verbose mode.')
 parser.add_argument('--debug', action='store_true', help='print out debug info.')
@@ -47,7 +48,8 @@ if __name__ == '__main__':
             storage=args.storage,
             verbose=args.verbose,
             debug=args.debug,
-            clean=args.clean
+            clean=args.clean,
+            use_triggers=args.use_triggers
         ))
         exit(0)
     print('No action specified. One must set either --currency or --pipeline flag. Use -h to see help.')
