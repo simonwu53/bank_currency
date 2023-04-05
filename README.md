@@ -63,7 +63,11 @@ Use crontab:
 crontab -e
 
 # add the following line
-# At minute 5 past every hour.
+# mail notification
+MAILTO=your_email_address
+# add conda PATH & nvm PATH
+PATH=/bin:/usr/bin:/home/user/miniconda3/bin:/home/usr/miniconda3/condabin:/home/user/.nvm/versions/node/v16.20.0
+# JOB: At minute 5 past every hour.
 5 */1 * * * /bin/bash /path/to/exe/job.sh
 ```
 
